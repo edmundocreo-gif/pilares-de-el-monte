@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import { Wine, ChevronRight, Sparkles, Calendar, Clock, MapPin, Leaf, Hammer, Tag } from "lucide-react";
+import { useState, useEffect, useRef } from 'react';
+import { Wine, ChevronRight, ChevronLeft, X, Sparkles, Calendar, Clock, MapPin, Leaf, Hammer, Tag } from "lucide-react";
 import './App.css';
 
 const Inicio = () => {
@@ -258,227 +258,321 @@ const Clases = () => {
   );
 };  
 
-const Proceso = () => {
-  const [procesoData, setProcesoData] = useState(null);
+const Recuerdos = () => {
+  const [recuerdos, setRecuerdos] = useState([]);
 
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/secciones/')
+    // Recuerda que esto apunta a la URL que configuraste (ej: http://127.0.0.1:8000/api)
+    fetch('http://127.0.0.1:8000/api/recuerdos/')
       .then(respuesta => respuesta.json())
-      .then(datos => {
-        const seccionProceso = datos.find(seccion => seccion.identificador === 'proceso');
-        setProcesoData(seccionProceso);
-      })
-      .catch(error => console.error("Error al cargar el proceso:", error));
+      .then(datos => setRecuerdos(datos))
+      .catch(error => console.error("Error al cargar recuerdos:", error));
   }, []);
-
-  const STEPS = [
-    {
-      n: "01",
-      icon: Leaf,
-      title: "Abastecimiento y Selección",
-      desc: "Todo comienza con la cuidadosa selección y compra de uvas a distintos proveedores externos. Utilizamos diversas variedades tintas y blancas, destacando especialmente la cepa Carménère.",
-      color: "#4a1220",
-    },
-    {
-      n: "02",
-      icon: Hammer,
-      title: "Molienda y Producción Tradicional",
-      desc: "Privilegiamos siempre los métodos artesanales: el uso de maquinaria es limitado y, fieles a nuestras raíces, no utilizamos bombas en algunas etapas del proceso productivo.",
-      color: "#c2541a",
-    },
-    {
-      n: "03",
-      icon: Tag,
-      title: "Crianza, Embotellado y Etiquetado",
-      desc: "Mantenemos control directo sobre toda la cadena de elaboración. El embotellamiento y etiquetado se realiza de forma manual, con etiquetas inspiradas en el legado de los Hermanos Carrera.",
-      color: "#d4a017",
-    },
-  ];
 
   return (
     <>
-      <div className="bg-amber-50 text-stone-900 pb-10 min-h-screen">
+      <div className="bg-amber-50 text-stone-900 pb-20 min-h-screen overflow-hidden">
         
-        {/* Título Hero conectado a Django */}
-        <section 
-          className="relative py-14 px-8 text-center bg-cover bg-center border-b border-amber-200"
-          style={procesoData?.imagen_fondo ? { backgroundImage: `url(${procesoData.imagen_fondo})` } : {}}
-        >
-          {/* Capa semitransparente */}
-          <div className="absolute inset-0 bg-gradient-to-b from-amber-100/90 via-amber-50/95 to-amber-50 backdrop-blur-[2px]"></div>
-          
+        {/* Título de la sección */}
+        <section className="relative py-14 px-8 text-center border-b border-amber-200 bg-gradient-to-b from-amber-100 via-amber-50 to-amber-50 mb-16">
           <div className="relative z-10">
             <div className="w-16 h-16 rounded-full bg-white border-4 border-amber-600 flex items-center justify-center mx-auto mb-4 shadow-md overflow-hidden">
               <img src="/logo.png" alt="Logo Pilares del Monte" className="w-full h-full object-contain scale-[2.5]" />
             </div>
-            <h1 className="font-serif text-4xl sm:text-5xl text-stone-900 mb-2 drop-shadow-sm">
-              {procesoData ? procesoData.titulo : "Nuestro Proceso Artesanal"}
+            <h1 className="font-serif text-4xl sm:text-5xl text-stone-900 mb-2">
+              Nuestros Recuerdos
             </h1>
-            <p className="italic text-stone-700 font-medium max-w-2xl mx-auto drop-shadow-sm whitespace-pre-wrap">
-              {procesoData && procesoData.contenido ? procesoData.contenido : "De la viña a la botella, sin perder el control de cada etapa"}
+            <p className="italic text-stone-600 max-w-2xl mx-auto">
+              El álbum familiar de San Francisco del Monte
             </p>
           </div>
         </section>
 
-        {/* Pasos */}
-        <section className="px-8 py-16 max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-            {STEPS.map((s, i) => {
-              const Icon = s.icon;
-              return (
-                <div key={s.n} className="flex items-start lg:items-stretch gap-6 lg:gap-0 lg:flex-col">
-                  <div className="bg-white rounded-lg shadow-md border border-amber-100 p-6 flex-1 hover:shadow-lg transition-shadow">
-                    <div className="flex items-center gap-4 mb-4">
-                      <div
-                        className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
-                        style={{ backgroundColor: s.color }}
-                      >
-                        <Icon className="w-5 h-5 text-amber-50" />
+        {/* Álbum Fotográfico Lateral */}
+        <section className="px-8 max-w-5xl mx-auto">
+          {recuerdos.length === 0 ? (
+            <p className="text-center text-stone-500 italic mt-10">Aún no hay recuerdos en el álbum.</p>
+          ) : (
+            <div className="space-y-24">
+              {recuerdos.map((recuerdo, index) => {
+                // Alternamos la dirección en cada fila: par a la izquierda, impar a la derecha
+                const isEven = index % 2 === 0;
+                
+                return (
+                  <div 
+                    key={recuerdo.id} 
+                    className={`flex flex-col md:flex-row items-center gap-10 md:gap-16 ${!isEven ? 'md:flex-row-reverse' : ''}`}
+                  >
+                    
+                    {/* Columna de la Foto (con el estilo de la Historia) */}
+                    <div className="w-full md:w-1/2 flex justify-center">
+                      <div className={`bg-white p-3 shadow-lg border border-amber-100 transition-transform duration-500 hover:rotate-0 ${isEven ? 'rotate-2' : '-rotate-2'} max-w-md w-full`}>
+                        <div
+                          className="h-80 flex flex-col items-center justify-center border-2 border-dashed border-amber-300 relative overflow-hidden bg-stone-100"
+                        >
+                          {recuerdo.imagen ? (
+                            <img 
+                              src={recuerdo.imagen} 
+                              alt={recuerdo.titulo} 
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="text-stone-400 italic text-sm">
+                              Sin fotografía
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-center text-xs tracking-widest text-stone-500 mt-3 uppercase font-semibold">
+                          {recuerdo.fecha || "Archivo Histórico"}
+                        </p>
                       </div>
-                      <span className="font-serif text-3xl text-amber-200">{s.n}</span>
                     </div>
-                    <h3 className="font-serif text-lg text-stone-900 mb-2 leading-snug">{s.title}</h3>
-                    <p className="text-sm text-stone-600 leading-relaxed">{s.desc}</p>
+
+                    {/* Columna de la Descripción */}
+                    <div className="w-full md:w-1/2 text-center md:text-left space-y-4">
+                      <div className="inline-block">
+                        <h2 className="font-serif text-3xl text-stone-900 mb-1">{recuerdo.titulo}</h2>
+                        <div className={`h-0.5 w-16 bg-amber-600 ${isEven ? 'mx-auto md:ml-0' : 'mx-auto md:ml-auto md:mr-0'}`}></div>
+                      </div>
+                      
+                      <p className="text-stone-700 leading-relaxed whitespace-pre-wrap text-lg">
+                        {recuerdo.descripcion}
+                      </p>
+                    </div>
+
                   </div>
-
-                  {i < STEPS.length - 1 && (
-                    <div className="hidden lg:flex justify-center py-3">
-                      <ChevronRight className="w-5 h-5 text-amber-500" />
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </section>
-
       </div>
-      <Footer />
     </>
   );
 };
 
 const Vinos = () => {
   const [vinos, setVinos] = useState([]);
-  const [fondoData, setFondoData] = useState(null);
-  const [cargando, setCargando] = useState(true);
-  const [filtroActivo, setFiltroActivo] = useState("Todos");
+  const [cepas, setCepas] = useState([]);
+  const [filtro, setFiltro] = useState('disponibles');
+  
+  // NUEVO ESTADO: Controla qué vino está abierto en el popup
+  const [vinoSeleccionado, setVinoSeleccionado] = useState(null);
+  
+  const carruselRef = useRef(null);
 
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/secciones/')
-      .then(respuesta => respuesta.json())
-      .then(datos => {
-        const seccionCatalogo = datos.find(seccion => seccion.identificador === 'catalogo');
-        setFondoData(seccionCatalogo);
-      })
-      .catch(error => console.error("Error al cargar el fondo:", error));
-
     fetch('http://127.0.0.1:8000/api/vinos/')
       .then(respuesta => respuesta.json())
-      .then(datos => {
-        setVinos(datos);
-        setCargando(false);
-      })
-      .catch(error => console.error("Error al cargar los vinos:", error));
+      .then(datos => setVinos(datos))
+      .catch(error => console.error("Error al cargar vinos:", error));
+
+    fetch('http://127.0.0.1:8000/api/cepas/')
+      .then(respuesta => respuesta.json())
+      .then(datos => setCepas(datos))
+      .catch(error => console.error("Error al cargar cepas:", error));
   }, []);
 
-  if (cargando) {
-    return <div className="pagina-temporal"><h2>Abriendo nuestra cava...</h2></div>;
-  }
+  const vinosFiltrados = vinos.filter((vino) => {
+    if (filtro === 'disponibles') return vino.stock > 0;
+    if (filtro === 'proximamente') return vino.stock === 0 || vino.stock == null;
+    return true;
+  });
 
-  const variedadesUnicas = ["Todos", ...new Set(vinos.map(v => v.variedad).filter(Boolean))];
-  const vinosFiltrados = filtroActivo === "Todos" 
-    ? vinos 
-    : vinos.filter(v => v.variedad === filtroActivo);
+  const moverCarrusel = (direccion) => {
+    if (carruselRef.current) {
+      const desplazamiento = direccion === 'izq' ? -320 : 320; 
+      carruselRef.current.scrollBy({ left: desplazamiento, behavior: 'smooth' });
+    }
+  };
+
+  const obtenerNombreCepa = (idCepa) => {
+    const cepaEncontrada = cepas.find(c => c.id === idCepa);
+    return cepaEncontrada ? cepaEncontrada.nombre : "Ensamblaje Especial";
+  };
 
   return (
     <>
-      <div className="min-h-screen bg-amber-50 text-stone-900 pb-10">
-        <section 
-          className="relative py-16 px-8 text-center bg-cover bg-center bg-fixed border-b border-amber-200"
-          style={fondoData?.imagen_fondo ? { backgroundImage: `url(${fondoData.imagen_fondo})` } : {}}
-        >
-          <div className="absolute inset-0 bg-amber-50/80 backdrop-blur-sm"></div>
-          
-          <div className="relative z-10">
-            <div className="flex items-center justify-center gap-4 mb-3">
-              <span className="h-px w-16 bg-amber-600" />
-              <Sparkles className="w-4 h-4 text-amber-700" />
-              <span className="h-px w-16 bg-amber-600" />
-            </div>
-            <h1 className="font-serif text-4xl sm:text-5xl text-stone-900 mb-3 drop-shadow-md">
-              {fondoData ? fondoData.titulo : "Nuestro Catálogo"}
-            </h1>
-            <p className="italic text-stone-700 font-medium max-w-md mx-auto drop-shadow">
-              Vinos con historia, etiqueta a etiqueta — cada cosecha cuenta un capítulo de San Francisco del Monte.
-            </p>
+      <div className="bg-amber-50 text-stone-900 pb-10 min-h-screen">
+        
+        {/* Título y Filtros se mantienen igual */}
+        <section className="bg-gradient-to-b from-amber-100 via-amber-50 to-amber-50 py-14 px-8 text-center mb-10 border-b border-amber-200">
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <span className="h-px w-12 bg-amber-600"></span>
+            <Wine className="w-6 h-6 text-amber-700" />
+            <span className="h-px w-12 bg-amber-600"></span>
           </div>
+          <h1 className="font-serif text-4xl sm:text-5xl text-stone-900 mb-2">Nuestro Catálogo</h1>
+          <p className="italic text-stone-600 max-w-lg mx-auto">
+            Vinos con historia, etiqueta a etiqueta — cada cosecha cuenta un capítulo de San Francisco del Monte.
+          </p>
         </section>
 
-        <div className="flex justify-center gap-3 px-8 py-8 flex-wrap">
-          {variedadesUnicas.map((variedad) => (
-            <button
-              key={variedad}
-              onClick={() => setFiltroActivo(variedad)}
-              className={`px-4 py-1.5 rounded-full text-sm tracking-wide border transition-colors ${
-                filtroActivo === variedad
-                  ? "bg-red-900 text-amber-50 border-red-900"
-                  : "bg-transparent text-stone-600 border-amber-300 hover:border-red-900 hover:text-red-900"
-              }`}
-            >
-              {variedad}
-            </button>
-          ))}
+        <div className="flex justify-center gap-4 mb-10 px-4">
+          <button
+            onClick={() => setFiltro('disponibles')}
+            className={`px-8 py-2.5 rounded-full font-serif text-sm transition-all duration-300 ${
+              filtro === 'disponibles' ? 'bg-red-900 text-amber-50 shadow-md scale-105' : 'bg-white text-stone-600 border border-amber-200 hover:bg-amber-100'
+            }`}
+          >
+            Disponibles
+          </button>
+          <button
+            onClick={() => setFiltro('proximamente')}
+            className={`px-8 py-2.5 rounded-full font-serif text-sm transition-all duration-300 ${
+              filtro === 'proximamente' ? 'bg-red-900 text-amber-50 shadow-md scale-105' : 'bg-white text-stone-600 border border-amber-200 hover:bg-amber-100'
+            }`}
+          >
+            Próximamente
+          </button>
         </div>
 
-        <section className="px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
-          {vinosFiltrados.map((vino) => (
-            <div
-              key={vino.id}
-              className="group relative bg-white rounded-lg shadow-md hover:shadow-xl transition-all hover:-translate-y-1 overflow-hidden border border-amber-100 flex flex-col"
-            >
-              <div
-                className="h-64 flex items-center justify-center border-b border-dashed border-amber-200 relative overflow-hidden bg-stone-50"
-              >
-                {vino.imagen ? (
-                  <img 
-                    src={vino.imagen} 
-                    alt={vino.nombre} 
-                    className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500" 
-                  />
-                ) : (
-                  <div className="w-16 h-16 rounded-full flex items-center justify-center shadow-inner bg-red-900 group-hover:scale-105 transition-transform">
-                    <Wine className="w-7 h-7 text-amber-50" />
-                  </div>
-                )}
-              </div>
+        {/* Carrusel de Vinos */}
+        <section className="relative px-4 sm:px-12 max-w-7xl mx-auto mb-20 group">
+          <button onClick={() => moverCarrusel('izq')} className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-white/90 backdrop-blur items-center justify-center rounded-full shadow-lg border border-amber-200 text-amber-800 hover:bg-amber-50 hover:scale-110 transition-all opacity-0 group-hover:opacity-100">
+            <ChevronLeft className="w-6 h-6" />
+          </button>
 
-              <div className="p-5 flex flex-col flex-grow">
-                <div className="h-0.5 w-10 mb-3 bg-red-900" />
-                
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-xs tracking-widest text-amber-700 font-semibold uppercase">
-                    COSECHA {vino.cosecha || vino.anio_cosecha}
-                  </span>
-                  <span className="text-sm font-bold text-red-900">
-                    ${vino.precio?.toLocaleString('es-CL')}
-                  </span>
+          <div ref={carruselRef} className="flex overflow-x-auto gap-8 pb-8 pt-4 snap-x snap-mandatory hide-scrollbar px-2">
+            {vinosFiltrados.length === 0 ? (
+              <div className="w-full text-center py-12 italic text-stone-500">No hay vinos en esta categoría por el momento.</div>
+            ) : (
+              vinosFiltrados.map((vino) => (
+                <div
+                  key={vino.id}
+                  /* Al hacer clic en la tarjeta, abrimos el popup */
+                  onClick={() => setVinoSeleccionado(vino)}
+                  className="flex-none w-72 sm:w-80 snap-center relative bg-white rounded-lg shadow-md hover:shadow-xl transition-all hover:-translate-y-1 overflow-hidden border border-amber-100 flex flex-col cursor-pointer group"
+                >
+                  <div className="h-64 flex items-center justify-center border-b border-dashed border-amber-200 relative overflow-hidden bg-stone-50">
+                    {vino.imagen ? (
+                      <img src={vino.imagen} alt={vino.nombre} className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500" />
+                    ) : (
+                      <div className="w-16 h-16 rounded-full flex items-center justify-center shadow-inner bg-red-900 group-hover:scale-105 transition-transform">
+                        <Wine className="w-7 h-7 text-amber-50" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-5 flex flex-col flex-grow">
+                    <div className="h-0.5 w-10 mb-3 bg-red-900" />
+                    
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-xs tracking-widest text-amber-700 font-semibold uppercase">
+                        COSECHA {vino.cosecha || vino.anio_cosecha}
+                      </span>
+                      <span className="text-sm font-bold text-red-900">
+                        ${vino.precio?.toLocaleString('es-CL')}
+                      </span>
+                    </div>
+                    
+                    <span className="self-start text-xs font-bold text-amber-900 bg-amber-100 px-2 py-1 rounded mb-2">
+                      {obtenerNombreCepa(vino.cepa)}
+                    </span>
+
+                    <h3 className="font-serif text-lg text-stone-900 mb-2 leading-snug">{vino.nombre}</h3>
+                    
+                    {/* Tarjeta limpia: Solo mostramos el maridaje, no la descripción larga */}
+                    <p className="text-sm text-stone-600 leading-relaxed mb-4 flex-grow italic">
+                      {vino.maridaje ? `Maridaje: ${vino.maridaje}` : "Haz clic para ver los detalles y notas de cata."}
+                    </p>
+                    
+                    <div className="flex items-center gap-1 text-sm font-medium text-red-900 transition-all mt-auto pt-4 border-t border-amber-100">
+                      Ver detalles <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </div>
                 </div>
-                
-                <h3 className="font-serif text-lg text-stone-900 mt-1 mb-2 leading-snug">{vino.nombre}</h3>
-                <p className="text-sm text-stone-600 leading-relaxed mb-4 line-clamp-3 flex-grow">
-                  {vino.descripcion}
-                </p>
-                
-                <button className="flex items-center gap-1 text-sm font-medium text-red-900 hover:gap-2 transition-all mt-auto pt-4 border-t border-amber-100">
-                  Agendar cata <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          ))}
+              ))
+            )}
+          </div>
+
+          <button onClick={() => moverCarrusel('der')} className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-white/90 backdrop-blur items-center justify-center rounded-full shadow-lg border border-amber-200 text-amber-800 hover:bg-amber-50 hover:scale-110 transition-all opacity-0 group-hover:opacity-100">
+            <ChevronRight className="w-6 h-6" />
+          </button>
         </section>
+
       </div>
       <Footer />
+
+      {/* VENTANA EMERGENTE (MODAL) DEL VINO */}
+      {vinoSeleccionado && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/70 backdrop-blur-sm">
+          
+          {/* Contenedor del Modal */}
+          <div className="bg-amber-50 w-full max-w-4xl rounded-xl shadow-2xl overflow-hidden flex flex-col md:flex-row relative animate-in fade-in zoom-in-95 duration-300">
+            
+            {/* Botón Cerrar */}
+            <button 
+              onClick={() => setVinoSeleccionado(null)}
+              className="absolute top-4 right-4 z-10 p-2 bg-white/80 hover:bg-white rounded-full text-stone-800 shadow-sm transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Lado Izquierdo: Imagen en grande */}
+            <div className="w-full md:w-1/2 bg-white flex items-center justify-center p-8 border-r border-amber-100">
+              {vinoSeleccionado.imagen ? (
+                <img 
+                  src={vinoSeleccionado.imagen} 
+                  alt={vinoSeleccionado.nombre} 
+                  className="w-full max-h-[60vh] object-contain hover:scale-110 transition-transform duration-700 cursor-zoom-in" 
+                />
+              ) : (
+                <Wine className="w-32 h-32 text-amber-200" />
+              )}
+            </div>
+
+            {/* Lado Derecho: Detalles Completos */}
+            <div className="w-full md:w-1/2 p-8 md:p-10 flex flex-col justify-center max-h-[80vh] overflow-y-auto custom-scrollbar">
+              <span className="text-sm tracking-widest text-amber-700 font-semibold uppercase mb-2">
+                COSECHA {vinoSeleccionado.cosecha || vinoSeleccionado.anio_cosecha}
+              </span>
+              
+              <h2 className="font-serif text-3xl md:text-4xl text-stone-900 mb-2 leading-tight">
+                {vinoSeleccionado.nombre}
+              </h2>
+              
+              <div className="flex items-center gap-3 mb-6">
+                <span className="text-sm font-bold text-amber-900 bg-amber-200 px-3 py-1 rounded-full">
+                  {obtenerNombreCepa(vinoSeleccionado.cepa)}
+                </span>
+                <span className="text-xl font-bold text-red-900">
+                  ${vinoSeleccionado.precio?.toLocaleString('es-CL')}
+                </span>
+              </div>
+
+              <div className="h-px w-full bg-amber-200 mb-6"></div>
+
+              {/* Aquí va la descripción completa */}
+              <div className="mb-6">
+                <h3 className="font-serif text-lg text-stone-900 mb-2">Notas de Cata</h3>
+                <p className="text-stone-700 leading-relaxed whitespace-pre-wrap">
+                  {vinoSeleccionado.descripcion}
+                </p>
+              </div>
+
+              {/* Mostrar maridaje si existe en la base de datos */}
+              {vinoSeleccionado.maridaje && (
+                <div className="mb-8 p-4 bg-amber-100/50 rounded-lg border border-amber-200">
+                  <h3 className="font-serif text-md text-stone-900 mb-1 flex items-center gap-2">
+                    <Tag className="w-4 h-4 text-amber-700" /> Maridaje Sugerido
+                  </h3>
+                  <p className="text-sm text-stone-700">{vinoSeleccionado.maridaje}</p>
+                </div>
+              )}
+
+              {/* Botón de acción */}
+              <Link 
+                to="/contactanos" 
+                className="mt-auto block w-full text-center bg-red-900 text-amber-50 py-3 rounded hover:bg-red-950 transition-colors font-serif text-lg shadow-md"
+              >
+                {filtro === 'disponibles' ? 'Agendar cata de este vino' : 'Consultar disponibilidad'}
+              </Link>
+            </div>
+
+          </div>
+        </div>
+      )}
     </>
   );
 };
@@ -517,12 +611,12 @@ function App() {
         
         <header className="navbar">
           <Link to="/" className="logo" style={{ textDecoration: 'none' }}>
-            Pilares del Monte
+            Pilares de El Monte
           </Link>
           
           <nav className="enlaces-nav">
             <Link to="/clases">CLASES</Link>
-            <Link to="/proceso">PROCESO</Link>
+            <Link to="/recuerdos">RECUERDOS</Link>
             <Link to="/vinos">VINOS</Link>
             <Link to="/contactanos">CONTÁCTANOS</Link>
           </nav>
@@ -531,7 +625,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Inicio />} />
           <Route path="/clases" element={<Clases />} />
-          <Route path="/proceso" element={<Proceso />} />
+          <Route path="/recuerdos" element={<Recuerdos />} />
           <Route path="/vinos" element={<Vinos />} />
           <Route path="/contactanos" element={<Contactanos />} />
         </Routes>
