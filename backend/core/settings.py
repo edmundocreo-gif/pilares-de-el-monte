@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-)^c$-ynnl5s!qzx(e$04!==3=$#r@6*8ul%5jeve!#u85v&k56
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.100.220', '127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -123,6 +123,8 @@ STATIC_URL = 'static/'
 # Configuración de permisos CORS
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # El puerto por defecto donde corre tu React (Vite)
+    "http://127.0.0.1:5173",
+    "http://192.168.100.220:5173",
 ]
 # Configuración de archivos multimedia (imágenes de los vinos)
 MEDIA_URL = '/media/'
