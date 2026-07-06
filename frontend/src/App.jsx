@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
-import { Wine, ChevronRight, ChevronLeft, X, Sparkles, Calendar, Clock, MapPin, Tag, Menu } from "lucide-react";
+import { Wine, ChevronRight, ChevronLeft, X, Sparkles, Calendar, Clock, MapPin, Tag, Menu, Mail, MessageCircle, Phone, User } from "lucide-react";
 import './App.css';
 
 const Navbar = () => {
@@ -647,14 +647,144 @@ const Vinos = () => {
   );
 };
 
-const Contactanos = () => (
-  <div className="bg-amber-50 text-stone-900 min-h-[60vh] flex items-center justify-center p-8">
-    <div className="text-center">
-      <h2 className="font-serif text-4xl text-[#7f1d1d] mb-4">Envíanos un mensaje</h2>
-      <p className="text-stone-600">Página de contacto en construcción.</p>
-    </div>
-  </div>
+const IconoInstagram = ({ className }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+  </svg>
 );
+
+const Contactanos = () => {
+  const [datosContacto, setDatosContacto] = useState(null);
+  const [alertaWa, setAlertaWa] = useState(false);
+
+  // 1. Conexión con Django para traer la información editable
+  useEffect(() => {
+    fetch('http://192.168.100.220:8000/api/secciones/')
+      .then(respuesta => respuesta.json())
+      .then(datos => {
+        const seccionContacto = datos.find(seccion => seccion.identificador === 'contacto');
+        setDatosContacto(seccionContacto);
+      })
+      .catch(error => console.error("Error al cargar contacto:", error));
+  }, []);
+
+  // 2. Lógica Inteligente del Horario de WhatsApp
+  const handleWhatsApp = () => {
+    const horaActual = new Date().getHours();
+    
+    // Si la hora es entre las 08:00 y las 17:59
+    if (horaActual >= 8 && horaActual < 18) {
+      window.open('https://wa.me/56930342433', '_blank');
+    } else {
+      // Fuera de horario: mostramos la alerta elegante
+      setAlertaWa(true);
+      // Ocultar automáticamente después de 5 segundos
+      setTimeout(() => setAlertaWa(false), 5000);
+    }
+  };
+
+  return (
+    <div className="bg-amber-50 min-h-screen pb-20 relative overflow-hidden">
+      
+      {/* SECCIÓN HERO (Fondo dinámico desde Django) */}
+      <section 
+        className="relative py-20 px-4 sm:px-8 text-center bg-cover bg-center border-b border-amber-200"
+        style={datosContacto?.imagen_fondo ? { backgroundImage: `url(${datosContacto.imagen_fondo})` } : { backgroundColor: '#eeddbb' }}
+      >
+        <div className="absolute inset-0 bg-stone-900/60 backdrop-blur-[2px]"></div>
+        
+        <div className="relative z-10 animate-in fade-in slide-in-from-bottom-5 duration-700 max-w-3xl mx-auto">
+          <h1 className="font-serif text-4xl sm:text-6xl text-amber-50 mb-4 drop-shadow-lg">
+            {datosContacto?.titulo || "Hablemos"}
+          </h1>
+          <div className="h-0.5 w-24 bg-amber-500 mx-auto mb-6"></div>
+          <p className="text-lg sm:text-xl text-amber-100/90 leading-relaxed whitespace-pre-wrap font-light">
+            {datosContacto?.contenido || "Estamos aquí para responder tus dudas, agendar tus visitas y compartir nuestra pasión por el vino de San Francisco de El Monte."}
+          </p>
+        </div>
+      </section>
+
+      {/* TARJETAS DE CONTACTO (Interactividad de redirección) */}
+      <section className="max-w-5xl mx-auto px-4 sm:px-8 -mt-10 relative z-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          
+          {/* Tarjeta Email */}
+          <a 
+            href="mailto:armijopilares@gmail.com"
+            className="bg-white p-8 rounded-xl shadow-lg border border-amber-100 flex flex-col items-center text-center hover:-translate-y-2 hover:shadow-xl transition-all duration-300 group"
+          >
+            <div className="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center mb-6 group-hover:bg-[#7f1d1d] transition-colors duration-500">
+              <Mail className="w-6 h-6 text-[#7f1d1d] group-hover:text-amber-50" />
+            </div>
+            <h3 className="font-serif text-xl text-stone-900 mb-2">Correo Electrónico</h3>
+            <p className="text-stone-500 text-sm mb-4">Escríbenos directamente</p>
+            <span className="font-medium text-[#7f1d1d] group-hover:underline">armijopilares@gmail.com</span>
+          </a>
+
+          {/* Tarjeta Instagram */}
+          <a 
+            href="https://www.instagram.com/vinopilaresdeelmonte?igsh=MW43bzV0Mmd5bmJ3ag=="
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-white p-8 rounded-xl shadow-lg border border-amber-100 flex flex-col items-center text-center hover:-translate-y-2 hover:shadow-xl transition-all duration-300 group"
+          >
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#6b1a20] flex items-center justify-center shrink-0 shadow-md group-hover:scale-110 transition-transform">
+  <IconoInstagram className="w-6 h-6 sm:w-7 sm:h-7 text-[#e8dcb9]" />
+</div>
+            <h3 className="font-serif text-xl text-stone-900 mb-2">Instagram</h3>
+            <p className="text-stone-500 text-sm mb-4">Síguenos en redes sociales</p>
+            <span className="font-medium text-[#b45309] group-hover:underline">@vinopilaresdeelmonte</span>
+          </a>
+
+          {/* Tarjeta Ubicación (No clickeable, solo informativa) */}
+          <div className="bg-white p-8 rounded-xl shadow-lg border border-amber-100 flex flex-col items-center text-center group hover:border-amber-300 transition-colors">
+            <div className="w-14 h-14 bg-stone-100 rounded-full flex items-center justify-center mb-6">
+              <MapPin className="w-6 h-6 text-stone-600" />
+            </div>
+            <h3 className="font-serif text-xl text-stone-900 mb-2">Nuestra Viña</h3>
+            <p className="text-stone-500 text-sm mb-4">Visítanos en</p>
+            <span className="font-medium text-stone-700">Moisés Chacón 78,<br/>San Francisco de El Monte</span>
+          </div>
+
+        </div>
+      </section>
+
+      {/* BURBUJA DE WHATSAPP FLOTANTE E INTELIGENTE */}
+      <div className="fixed bottom-6 right-6 sm:bottom-10 sm:right-10 z-50 flex flex-col items-end">
+        
+        {/* Alerta de "Fuera de Horario" (Aparece solo si el usuario pincha de noche) */}
+        {alertaWa && (
+          <div className="mb-4 bg-white p-4 rounded-xl shadow-2xl border-l-4 border-amber-600 max-w-[280px] animate-in slide-in-from-bottom-5 fade-in duration-300 relative">
+            <button onClick={() => setAlertaWa(false)} className="absolute top-2 right-2 text-stone-400 hover:text-stone-600">
+              <X className="w-4 h-4" />
+            </button>
+            <p className="font-serif text-stone-900 text-sm mb-1 font-bold">Fuera de horario</p>
+            <p className="text-xs text-stone-600 leading-tight">
+              Actualmente estamos descansando. Nuestro horario de atención es de 08:00 a 18:00 hrs. ¡Te esperamos mañana!
+            </p>
+          </div>
+        )}
+
+        {/* Botón Principal */}
+        <button 
+          onClick={handleWhatsApp}
+          className="bg-green-600 text-white p-4 rounded-full shadow-[0_10px_20px_rgba(22,163,74,0.3)] hover:bg-green-500 hover:scale-110 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center group"
+          title="Chatea con nosotros en WhatsApp"
+        >
+          <MessageCircle className="w-8 h-8 sm:w-10 sm:h-10" />
+          
+          {/* Pequeño globo de texto que dice "Hablemos" y aparece al pasar el mouse */}
+          <span className="absolute right-full mr-4 bg-stone-900 text-white text-xs font-medium px-3 py-1.5 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-300 hidden sm:block">
+            Hablemos por WhatsApp
+          </span>
+        </button>
+      </div>
+
+    </div>
+  );
+};
 
 // NUEVO FOOTER RESPONSIVO EN TAILWIND
 const Footer = () => (
